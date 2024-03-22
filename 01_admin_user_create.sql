@@ -1,3 +1,5 @@
+alter session set current_schema=ADMIN;
+
 SET SERVEROUTPUT ON;
 
 DECLARE
