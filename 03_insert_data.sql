@@ -15,40 +15,63 @@ END;
 
 -- TRAIN -- 
 
--- For orangeline_inbound
 DECLARE
-    v_train_id NUMBER := 1;  -- Starting train_id
+    train_count NUMBER;
 BEGIN
-    FOR i IN 1..144 LOOP  -- Populate 144 trains for 12 hours
-        INSERT INTO Train (train_id, train_name, model)
-        VALUES (v_train_id, 'Train for Orange Line Inbound', 'Model A');
-        
-        v_train_id := v_train_id + 1;  -- Increment train_id
-    END LOOP;
+    -- Check if there are existing records in the Train table
+    SELECT COUNT(*) INTO train_count FROM Train;
+
+    -- If no records are found, proceed with populating the Train table
+    IF train_count = 0 THEN
+        -- For orangeline_inbound
+        DECLARE
+            v_train_id NUMBER := 1;  -- Starting train_id
+        BEGIN
+            FOR i IN 1..144 LOOP  -- Populate 144 trains for 12 hours
+                INSERT INTO Train (train_id, train_name, model)
+                VALUES (v_train_id, 'Train for Orange Line Inbound', 'Model A');
+                
+                v_train_id := v_train_id + 1;  -- Increment train_id
+            END LOOP;
+        END;
+
+        -- For orangeline_outbound
+        DECLARE
+            v_train_id NUMBER := 145;  -- Starting train_id
+        BEGIN
+            FOR i IN 1..144 LOOP  -- Populate 144 trains for 12 hours
+                INSERT INTO Train (train_id, train_name, model)
+                VALUES (v_train_id, 'Train for Orange Line Outbound', 'Model B');
+                
+                v_train_id := v_train_id + 1;  -- Increment train_id
+            END LOOP;
+        END;
+
+        COMMIT;
+    END IF;
 END;
 /
-
--- For orangeline_outbound
-DECLARE
-    v_train_id NUMBER := 145;  -- Starting train_id
-BEGIN
-    FOR i IN 1..144 LOOP  -- Populate 144 trains for 12 hours
-        INSERT INTO Train (train_id, train_name, model)
-        VALUES (v_train_id, 'Train for Orange Line Outbound', 'Model B');
-        
-        v_train_id := v_train_id + 1;  -- Increment train_id
-    END LOOP;
-END;
-/
-
-commit;
 
 
 
 -- ROUTE -- 
 
-INSERT INTO Route (route_id, route_name, distance) VALUES (1, 'orangeline_inbound', 100);
-INSERT INTO Route (route_id, route_name, distance) VALUES (2, 'orangeline_outbound', 100);
+DECLARE
+    route_count NUMBER;
+BEGIN
+    -- Check if there are existing records in the Route table
+    SELECT COUNT(*) INTO route_count FROM Route;
+
+    -- If no records are found, proceed with inserting data into the Route table
+    IF route_count = 0 THEN
+        -- Insert data into Route table
+        INSERT INTO Route (route_id, route_name, distance) VALUES (1, 'orangeline_inbound', 100);
+        INSERT INTO Route (route_id, route_name, distance) VALUES (2, 'orangeline_outbound', 100);
+        
+        COMMIT;
+    END IF;
+END;
+/
 
 
 
@@ -242,51 +265,71 @@ END;
 
 
 DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
     -- Define variables for start and end times for operational hours
     start_time TIMESTAMP := TIMESTAMP '2024-03-13 06:00:00';
     end_time TIMESTAMP := TIMESTAMP '2024-03-13 18:00:00';
     -- Define the time interval between trains
-    interval INTERVAL DAY TO SECOND := INTERVAL '30' MINUTE;
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '30' MINUTE;
     -- Initialize the train_id
     train_id_route1 NUMBER := 1;
     train_id_route2 NUMBER := 144;
     -- Initialize current_time
     current_time TIMESTAMP := start_time;
 BEGIN
-    -- Loop through each minute within the operational hours
-    WHILE current_time <= end_time LOOP
-        -- Loop through each station for Route 1
-        FOR station_id IN 1..20 LOOP
-            -- Calculate time for Route 1
-            DECLARE
-                time_for_route1 TIMESTAMP := current_time + (station_id * INTERVAL '3' MINUTE);
-            BEGIN
-                -- Insert data into Master_table for Route 1
-                INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
-                VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-03-13', train_id_route1, time_for_route1);
-            END;
+    -- Check if there are existing records in the Master_table
+    SELECT COUNT(*) INTO master_table_count FROM Master_table;
+
+    -- If no records are found, proceed with populating the Master_table
+    IF master_table_count = 0 THEN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-03-13', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-03-13', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
         END LOOP;
 
-        -- Loop through each station for Route 2
-        FOR station_id IN REVERSE 1..20 LOOP
-            -- Calculate time for Route 2
-            DECLARE
-                time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * INTERVAL '3' MINUTE);
-            BEGIN
-                -- Insert data into Master_table for Route 2
-                INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
-                VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-03-13', train_id_route2, time_for_route2);
-            END;
-        END LOOP;
-
-        -- Increment current_time for the next set of trains
-        current_time := current_time + interval;
-        -- Increment train_id for the next set of trains
-        train_id_route1 := train_id_route1 + 1;
-        train_id_route2 := train_id_route2 + 1;
-    END LOOP;
+        COMMIT;
+    END IF;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
 END;
 /
+
+
+
+
 
 DECLARE
     e_insert_error EXCEPTION;
@@ -312,18 +355,9 @@ BEGIN
     INSERT INTO schedule_change_request (schedule_change_id, employee_id, route_id, request_date, original_schedule_time, new_schedule_time, status, reason)
     VALUES (6, 6, 2, TO_DATE('2024-03-13', 'YYYY-MM-DD'), TO_DATE('2024-03-13 11:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2024-03-13 12:00:00', 'YYYY-MM-DD HH24:MI:SS'), 'pending', 'Requesting schedule change for later shift');
 
-    BEGIN
-        INSERT INTO schedule_change_request (schedule_change_id, employee_id, route_id, request_date, original_schedule_time, new_schedule_time, status, reason)
-        VALUES (7, 7, 1, TO_DATE('2024-03-13 12:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2024-03-13 12:00:00', 'YYYY-MM-DD HH24:MI:SS'), TO_DATE('2024-03-13 13:00:00', 'YYYY-MM-DD HH24:MI:SS'), 'pending', 'Requesting schedule change for earlier shift');
-    EXCEPTION
-        WHEN e_insert_error THEN
-            NULL;
-    END;
-
-    commit;
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        NULL; -- Ignore the exception for duplicate values
 END;
 /
-
-
-
 
