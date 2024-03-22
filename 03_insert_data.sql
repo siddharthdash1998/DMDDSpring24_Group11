@@ -361,3 +361,88 @@ EXCEPTION
 END;
 /
 
+
+-- COMMUTER -- 
+DECLARE 
+    commuter_insert_error EXCEPTION; 
+    PRAGMA EXCEPTION_INIT(commuter_insert_error, -1); 
+BEGIN 
+    -- Insert commuter data here 
+    INSERT INTO METRO_ADMIN.Commuter (commuter_id, first_name, last_name, email, phone_number) 
+    VALUES (1, 'John', 'Doe', 'john.doe@example.com', '123-456-7890'); 
+
+    INSERT INTO METRO_ADMIN.Commuter (commuter_id, first_name, last_name, email, phone_number) 
+    VALUES (2, 'Jane', 'Smith', 'jane.smith@example.com', '987-654-3210'); 
+
+    INSERT INTO METRO_ADMIN.Commuter (commuter_id, first_name, last_name, email, phone_number) 
+    VALUES (3, 'Alice', 'Johnson', 'alice.johnson@example.com', '555-123-4567'); 
+EXCEPTION 
+    WHEN commuter_insert_error THEN 
+        NULL; -- Ignore the exception for commuter insertion 
+END; 
+/ 
+
+-- TICKETING_SYSTEM -- 
+DECLARE 
+    ticketing_system_insert_error EXCEPTION; 
+    PRAGMA EXCEPTION_INIT(ticketing_system_insert_error, -1); 
+BEGIN 
+    -- Insert ticketing system data here 
+    INSERT INTO METRO_ADMIN.Ticketing_System (ticket_system_id, commuter_id, start_station, end_station, "TIME") 
+    VALUES (1, 1, 'Oak Grove', 'Forest Hills', TIMESTAMP '2024-03-13 07:00:00'); 
+
+    INSERT INTO METRO_ADMIN.Ticketing_System (ticket_system_id, commuter_id, start_station, end_station, "TIME") 
+    VALUES (2, 2, 'Malden Center', 'Downtown Crossing', TIMESTAMP '2024-03-13 08:15:00'); 
+
+    INSERT INTO METRO_ADMIN.Ticketing_System (ticket_system_id, commuter_id, start_station, end_station, "TIME") 
+    VALUES (3, 3, 'Wellington', 'Back Bay', TIMESTAMP '2024-03-13 09:30:00'); 
+EXCEPTION 
+    WHEN ticketing_system_insert_error THEN 
+        NULL; -- Ignore the exception for ticketing system insertion 
+END; 
+/ 
+
+DECLARE
+    ticket_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(ticket_insert_error, -1);
+BEGIN
+    -- Insert ticket data here
+    INSERT INTO METRO_ADMIN.Ticket (ticket_id, ticket_system_id, srst_id, purchase_date, fare)
+    VALUES (1, 1, 1, DATE '2024-03-13', 2.50);
+    
+    INSERT INTO METRO_ADMIN.Ticket (ticket_id, ticket_system_id, srst_id, purchase_date, fare)
+    VALUES (2, 2, 2, DATE '2024-03-13', 2.75);
+    
+    INSERT INTO METRO_ADMIN.Ticket (ticket_id, ticket_system_id, srst_id, purchase_date, fare)
+    VALUES (3, 3, 3, DATE '2024-03-13', 3.00);
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        NULL; -- Ignore the exception for duplicate values
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+-- FEEDBACK -- 
+DECLARE
+    feedback_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(feedback_insert_error, -1);
+BEGIN
+    -- Insert feedback data here
+    INSERT INTO METRO_ADMIN.Feedback (feedback_id, ticket_id, feedback_text, rating, date_of_feedback)
+    VALUES (1, 1, 'Great service!', 5, DATE '2024-03-13');
+    
+    INSERT INTO METRO_ADMIN.Feedback (feedback_id, ticket_id, feedback_text, rating, date_of_feedback)
+    VALUES (2, 2, 'Train was delayed.', 3, DATE '2024-03-13');
+    
+    INSERT INTO METRO_ADMIN.Feedback (feedback_id, ticket_id, feedback_text, rating, date_of_feedback)
+    VALUES (3, 3, 'Clean trains.', 4, DATE '2024-03-13');
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        NULL; -- Ignore the exception for duplicate values
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+
