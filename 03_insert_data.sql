@@ -361,7 +361,7 @@ EXCEPTION
 END;
 /
 
-
+/*
 -- COMMUTER -- 
 DECLARE 
     commuter_insert_error EXCEPTION; 
@@ -445,4 +445,4 @@ EXCEPTION
 END;
 /
 
-
+*/
