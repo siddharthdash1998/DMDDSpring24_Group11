@@ -1,3 +1,5 @@
+alter session set current_schema=METRO_ADMIN;
+
 SET SERVEROUTPUT ON;
 
 DECLARE
@@ -176,7 +178,7 @@ BEGIN
                 srst_id INT,
                 purchase_date DATE,
                 fare DECIMAL(10, 2),
-                journey_end BOOLEAN DEFAULT FALSE, -- New column added
+                journey_end CHAR(1) DEFAULT ''N'' CHECK (journey_end IN (''Y'', ''N'')), -- New column added
                 FOREIGN KEY (srst_id) REFERENCES MASTER_TABLE(srst_id)
             )';
             DBMS_OUTPUT.PUT_LINE('Created Table TICKET');
@@ -214,7 +216,7 @@ BEGIN
                 ticket_id INT,
                 feedback_text VARCHAR2(255),
                 rating INT CHECK (rating IN (1, 2, 3, 4, 5)), -- Restricting rating values
-                date_of_feedback DATE DEFAULT SYSDATE, -- Setting default value to current date
+                date_of_feedback TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Setting default value to current date
                 FOREIGN KEY (ticket_id) REFERENCES Ticket(ticket_id)
             )';
             DBMS_OUTPUT.PUT_LINE('Created Table FEEDBACK');
