@@ -95,7 +95,7 @@ CREATE OR REPLACE PACKAGE BODY metro_admin_pkg AS
         IF v_table_count = 0 THEN
             EXECUTE IMMEDIATE '
                 CREATE TABLE Employee (
-                    employee_id INT PRIMARY KEY,
+                    employee_id Number PRIMARY KEY,
                     first_name VARCHAR(255) NOT NULL,
                     last_name VARCHAR(255) NOT NULL,
                     position VARCHAR(100),
