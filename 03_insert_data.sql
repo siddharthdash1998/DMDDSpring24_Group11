@@ -27,7 +27,7 @@ BEGIN
         DECLARE
             v_train_id NUMBER := 1;  -- Starting train_id
         BEGIN
-            FOR i IN 1..144 LOOP  -- Populate 144 trains for 12 hours
+            FOR i IN 1..600 LOOP  -- Populate 144 trains for 12 hours
                 INSERT INTO Train (train_id, train_name, model)
                 VALUES (v_train_id, 'Train for Orange Line Inbound', 'Model A');
                 
@@ -37,9 +37,9 @@ BEGIN
 
         -- For orangeline_outbound
         DECLARE
-            v_train_id NUMBER := 145;  -- Starting train_id
+            v_train_id NUMBER := 601;  -- Starting train_id
         BEGIN
-            FOR i IN 1..144 LOOP  -- Populate 144 trains for 12 hours
+            FOR i IN 1..600 LOOP  -- Populate 144 trains for 12 hours
                 INSERT INTO Train (train_id, train_name, model)
                 VALUES (v_train_id, 'Train for Orange Line Outbound', 'Model B');
                 
@@ -233,9 +233,6 @@ EXCEPTION
 END;
 /
 
-
-
-
 DECLARE
     srst_sequence_error EXCEPTION;
     PRAGMA EXCEPTION_INIT(srst_sequence_error, -1);
@@ -262,17 +259,15 @@ EXCEPTION
 END;
 /
 
-
-
 DECLARE
     master_table_insert_error EXCEPTION;
     PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
     master_table_count NUMBER;
     -- Define variables for start and end times for operational hours
-    start_time TIMESTAMP := TIMESTAMP '2024-03-13 06:00:00';
-    end_time TIMESTAMP := TIMESTAMP '2024-03-13 18:00:00';
+    start_time TIMESTAMP := TIMESTAMP '2024-04-20 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-20 19:00:00';
     -- Define the time interval between trains
-    interval_value INTERVAL DAY TO SECOND := INTERVAL '30' MINUTE;
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
     -- Initialize the train_id
     train_id_route1 NUMBER := 1;
     train_id_route2 NUMBER := 144;
@@ -294,7 +289,7 @@ BEGIN
                 BEGIN
                     -- Insert data into Master_table for Route 1
                     INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
-                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-03-13', train_id_route1, time_for_route1);
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-20', train_id_route1, time_for_route1);
                 END;
             END LOOP;
 
@@ -306,7 +301,7 @@ BEGIN
                 BEGIN
                     -- Insert data into Master_table for Route 2
                     INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
-                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-03-13', train_id_route2, time_for_route2);
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-20', train_id_route2, time_for_route2);
                 END;
             END LOOP;
 
@@ -327,6 +322,404 @@ EXCEPTION
 END;
 /
 
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-21 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-21 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-21', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-21', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-22 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-22 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-22', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-22', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-23 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-23 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-23', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-23', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-24 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-24 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-24', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-24', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-25 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-25 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-25', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-25', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-26 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-26 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-26', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-26', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
+
+DECLARE
+    master_table_insert_error EXCEPTION;
+    PRAGMA EXCEPTION_INIT(master_table_insert_error, -1);
+    master_table_count NUMBER;
+    -- Define variables for start and end times for operational hours
+    start_time TIMESTAMP := TIMESTAMP '2024-04-27 06:00:00';
+    end_time TIMESTAMP := TIMESTAMP '2024-04-27 19:00:00';
+    -- Define the time interval between trains
+    interval_value INTERVAL DAY TO SECOND := INTERVAL '5' MINUTE;
+    -- Initialize the train_id
+    train_id_route1 NUMBER := 1;
+    train_id_route2 NUMBER := 144;
+    -- Initialize current_time
+    current_time TIMESTAMP := start_time;
+BEGIN
+        -- Loop through each minute within the operational hours
+        WHILE current_time <= end_time LOOP
+            -- Loop through each station for Route 1
+            FOR station_id IN 1..20 LOOP
+                -- Calculate time for Route 1
+                DECLARE
+                    time_for_route1 TIMESTAMP := current_time + (station_id * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 1
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 1, station_id, DATE '2024-04-27', train_id_route1, time_for_route1);
+                END;
+            END LOOP;
+
+            -- Loop through each station for Route 2
+            FOR station_id IN REVERSE 1..20 LOOP
+                -- Calculate time for Route 2
+                DECLARE
+                    time_for_route2 TIMESTAMP := current_time + ((20 - station_id) * interval_value);
+                BEGIN
+                    -- Insert data into Master_table for Route 2
+                    INSERT INTO Master_table (srst_id, route_id, station_id, "Date", train_id, "Time")
+                    VALUES (srst_id_sequence.nextval, 2, station_id, DATE '2024-04-27', train_id_route2, time_for_route2);
+                END;
+            END LOOP;
+
+            -- Increment current_time for the next set of trains
+            current_time := current_time + interval_value;
+            -- Increment train_id for the next set of trains
+            train_id_route1 := train_id_route1 + 1;
+            train_id_route2 := train_id_route2 + 1;
+        END LOOP;
+
+        COMMIT;
+EXCEPTION
+    WHEN master_table_insert_error THEN
+        NULL; -- Ignore if the insert fails due to data already existing
+    WHEN OTHERS THEN
+        RAISE; -- Raise any other exceptions
+END;
+/
 
 
 
@@ -360,6 +753,8 @@ EXCEPTION
         NULL; -- Ignore the exception for duplicate values
 END;
 /
+
+commit;
 
 /*
 -- COMMUTER -- 
@@ -446,3 +841,6 @@ END;
 /
 
 */
+
+
+
