@@ -756,91 +756,114 @@ END;
 
 commit;
 
-/*
--- COMMUTER -- 
-DECLARE 
-    commuter_insert_error EXCEPTION; 
-    PRAGMA EXCEPTION_INIT(commuter_insert_error, -1); 
-BEGIN 
-    -- Insert commuter data here 
-    INSERT INTO METRO_ADMIN.Commuter (commuter_id, first_name, last_name, email, phone_number) 
-    VALUES (1, 'John', 'Doe', 'john.doe@example.com', '123-456-7890'); 
-
-    INSERT INTO METRO_ADMIN.Commuter (commuter_id, first_name, last_name, email, phone_number) 
-    VALUES (2, 'Jane', 'Smith', 'jane.smith@example.com', '987-654-3210'); 
-
-    INSERT INTO METRO_ADMIN.Commuter (commuter_id, first_name, last_name, email, phone_number) 
-    VALUES (3, 'Alice', 'Johnson', 'alice.johnson@example.com', '555-123-4567'); 
-EXCEPTION 
-    WHEN commuter_insert_error THEN 
-        NULL; -- Ignore the exception for commuter insertion 
-END; 
-/ 
-
--- TICKETING_SYSTEM -- 
-DECLARE 
-    ticketing_system_insert_error EXCEPTION; 
-    PRAGMA EXCEPTION_INIT(ticketing_system_insert_error, -1); 
-BEGIN 
-    -- Insert ticketing system data here 
-    INSERT INTO METRO_ADMIN.Ticketing_System (ticket_system_id, commuter_id, start_station, end_station, "TIME") 
-    VALUES (1, 1, 'Oak Grove', 'Forest Hills', TIMESTAMP '2024-03-13 07:00:00'); 
-
-    INSERT INTO METRO_ADMIN.Ticketing_System (ticket_system_id, commuter_id, start_station, end_station, "TIME") 
-    VALUES (2, 2, 'Malden Center', 'Downtown Crossing', TIMESTAMP '2024-03-13 08:15:00'); 
-
-    INSERT INTO METRO_ADMIN.Ticketing_System (ticket_system_id, commuter_id, start_station, end_station, "TIME") 
-    VALUES (3, 3, 'Wellington', 'Back Bay', TIMESTAMP '2024-03-13 09:30:00'); 
-EXCEPTION 
-    WHEN ticketing_system_insert_error THEN 
-        NULL; -- Ignore the exception for ticketing system insertion 
-END; 
-/ 
-
 DECLARE
-    ticket_insert_error EXCEPTION;
-    PRAGMA EXCEPTION_INIT(ticket_insert_error, -1);
 BEGIN
-    -- Insert ticket data here
-    INSERT INTO METRO_ADMIN.Ticket (ticket_id, ticket_system_id, srst_id, purchase_date, fare)
-    VALUES (1, 1, 1, DATE '2024-03-13', 2.50);
-    
-    INSERT INTO METRO_ADMIN.Ticket (ticket_id, ticket_system_id, srst_id, purchase_date, fare)
-    VALUES (2, 2, 2, DATE '2024-03-13', 2.75);
-    
-    INSERT INTO METRO_ADMIN.Ticket (ticket_id, ticket_system_id, srst_id, purchase_date, fare)
-    VALUES (3, 3, 3, DATE '2024-03-13', 3.00);
-EXCEPTION
-    WHEN DUP_VAL_ON_INDEX THEN
-        NULL; -- Ignore the exception for duplicate values
-    WHEN OTHERS THEN
-        RAISE; -- Raise any other exceptions
+    -- Drop the sequence if it exists
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP SEQUENCE METRO_ADMIN.commuter_id_seq';
+        DBMS_OUTPUT.PUT_LINE('Dropped Sequence COMMUTER_ID_SEQ');
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -2289 THEN -- Sequence does not exist
+                RAISE;
+            END IF;
+    END;
+
+    -- Create the sequence
+    EXECUTE IMMEDIATE 'CREATE SEQUENCE METRO_ADMIN.commuter_id_seq START WITH 1 INCREMENT BY 1';
+    DBMS_OUTPUT.PUT_LINE('Created Sequence COMMUTER_ID_SEQ');
+
+    -- Create the package specification
+    EXECUTE IMMEDIATE '
+        CREATE OR REPLACE PACKAGE METRO_ADMIN.Commuter_Onboarding_Pkg AS
+            PROCEDURE Register_Commuter(
+                p_first_name IN VARCHAR2,
+                p_last_name IN VARCHAR2,
+                p_email IN VARCHAR2,
+                p_password IN VARCHAR2,
+                p_phone_number IN VARCHAR2
+            );
+
+            PROCEDURE Update_Commuter(
+                p_commuter_id IN NUMBER,
+                p_first_name IN VARCHAR2,
+                p_last_name IN VARCHAR2,
+                p_email IN VARCHAR2,
+                p_password IN VARCHAR2,
+                p_phone_number IN VARCHAR2
+            );
+
+            PROCEDURE Delete_Commuter(
+                p_commuter_id IN NUMBER
+            );
+        END Commuter_Onboarding_Pkg;';
+
+    -- Create the package body
+    EXECUTE IMMEDIATE '
+        CREATE OR REPLACE PACKAGE BODY METRO_ADMIN.Commuter_Onboarding_Pkg AS
+            PROCEDURE Register_Commuter(
+                p_first_name IN VARCHAR2,
+                p_last_name IN VARCHAR2,
+                p_email IN VARCHAR2,
+                p_password IN VARCHAR2,
+                p_phone_number IN VARCHAR2
+            ) IS
+            BEGIN
+                INSERT INTO METRO_ADMIN.COMMUTER (commuter_id, first_name, last_name, email, password, phone_number) 
+                VALUES (METRO_ADMIN.commuter_id_seq.NEXTVAL, p_first_name, p_last_name, p_email, p_password, p_phone_number);
+            END Register_Commuter;
+
+            PROCEDURE Update_Commuter(
+                p_commuter_id IN NUMBER,
+                p_first_name IN VARCHAR2,
+                p_last_name IN VARCHAR2,
+                p_email IN VARCHAR2,
+                p_password IN VARCHAR2,
+                p_phone_number IN VARCHAR2
+            ) IS
+            BEGIN
+                UPDATE METRO_ADMIN.COMMUTER 
+                SET first_name = p_first_name,
+                    last_name = p_last_name,
+                    email = p_email,
+                    password = p_password,
+                    phone_number = p_phone_number
+                WHERE commuter_id = p_commuter_id;
+            END Update_Commuter;
+
+            PROCEDURE Delete_Commuter(
+                p_commuter_id IN NUMBER
+            ) IS
+            BEGIN
+                DELETE FROM METRO_ADMIN.COMMUTER WHERE commuter_id = p_commuter_id;
+            END Delete_Commuter;
+        END Commuter_Onboarding_Pkg;';
+
+    DBMS_OUTPUT.PUT_LINE('Created Sequence, Package Specification, and Package Body');
 END;
 /
 
--- FEEDBACK -- 
-DECLARE
-    feedback_insert_error EXCEPTION;
-    PRAGMA EXCEPTION_INIT(feedback_insert_error, -1);
+
+--- above is working --- 
+
+
 BEGIN
-    -- Insert feedback data here
-    INSERT INTO METRO_ADMIN.Feedback (feedback_id, ticket_id, feedback_text, rating, date_of_feedback)
-    VALUES (1, 1, 'Great service!', 5, DATE '2024-03-13');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Amit', 'Sharma', 'amit_sharma@example.com', 'password1', '987654321');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Priya', 'Patel', 'priya_patel@example.com', 'password2', '987654322');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Anjali', 'Yadav', 'anjali_yadav@example.com', 'password3', '987654326');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Sandeep', 'Kumar', 'sandeep_kumar@example.com', 'password4', '987654327');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Pooja', 'Joshi', 'pooja_joshi@example.com', 'password5', '987654328');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Rajesh', 'Mishra', 'rajesh_mishra@example.com', 'password6', '987654329');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Sunita', 'Thakur', 'sunita_thakur@example.com', 'password7', '987654330');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Vikas', 'Singhal', 'vikas_singhal@example.com', 'password8', '987654331');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Divya', 'Shah', 'divya_shah@example.com', 'password9', '987654332');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Ajay', 'Rastogi', 'ajay_rastogi@example.com', 'password10', '987654333');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Shilpa', 'Sharma', 'shilpa_sharma@example.com', 'password11', '987654334');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Rajendra', 'Patil', 'rajendra_patil@example.com', 'password12', '987654335');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Rahul', 'Verma', 'rahul_verma@example.com', 'password13', '987654323');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Neha', 'Gupta', 'neha_gupta@example.com', 'password14', '987654324');
+    METRO_ADMIN.Commuter_Onboarding_Pkg.Register_Commuter('Deepak', 'Singh', 'deepak_singh@example.com', 'password15', '987654325');
     
-    INSERT INTO METRO_ADMIN.Feedback (feedback_id, ticket_id, feedback_text, rating, date_of_feedback)
-    VALUES (2, 2, 'Train was delayed.', 3, DATE '2024-03-13');
-    
-    INSERT INTO METRO_ADMIN.Feedback (feedback_id, ticket_id, feedback_text, rating, date_of_feedback)
-    VALUES (3, 3, 'Clean trains.', 4, DATE '2024-03-13');
-EXCEPTION
-    WHEN DUP_VAL_ON_INDEX THEN
-        NULL; -- Ignore the exception for duplicate values
-    WHEN OTHERS THEN
-        RAISE; -- Raise any other exceptions
+    COMMIT;
 END;
 /
-
-*/
-
-
-
