@@ -229,3 +229,92 @@ END;
 /
 
 
+/*
+CREATE TABLE Train (
+    train_id NUMBER PRIMARY KEY,
+    train_name VARCHAR2(100),
+    model VARCHAR2(50)
+);
+
+CREATE TABLE Route (
+    route_id NUMBER PRIMARY KEY,
+    route_name VARCHAR2(100),
+    distance NUMBER
+);
+
+CREATE TABLE Station (
+    station_id NUMBER PRIMARY KEY,
+    station_name VARCHAR2(100),
+    location VARCHAR2(100),
+    capacity NUMBER
+);
+
+CREATE TABLE Employee (
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    position VARCHAR(100),
+    station_id INT,
+    FOREIGN KEY (station_id) REFERENCES Station(station_id)
+);
+
+CREATE TABLE Master_table (
+    srst_id NUMBER PRIMARY KEY,
+    route_id NUMBER,
+    station_id NUMBER,
+    "Date" DATE,
+    train_id NUMBER,
+    "Time" DATE,
+    CONSTRAINT fk_route_id FOREIGN KEY (route_id) REFERENCES Route(route_id),
+    CONSTRAINT fk_station_id FOREIGN KEY (station_id) REFERENCES Station(station_id),
+    CONSTRAINT fk_train_id FOREIGN KEY (train_id) REFERENCES Train(train_id)
+);
+
+CREATE TABLE schedule_change_request (
+    schedule_change_id NUMBER PRIMARY KEY,
+    employee_id NUMBER,
+    route_id NUMBER,
+    request_date DATE,
+    original_schedule_time DATE,
+    new_schedule_time DATE,
+    status VARCHAR2(20),
+    reason VARCHAR2(100),
+    CONSTRAINT fk_employee_id FOREIGN KEY (employee_id) REFERENCES Employee(employee_id),
+    CONSTRAINT chk_status_value CHECK (status IN ('pending', 'rejected', 'accepted'))
+);
+
+CREATE TABLE COMMUTER (
+    commuter_id INT PRIMARY KEY,
+    first_name VARCHAR2(255) NOT NULL,
+    last_name VARCHAR2(255) NOT NULL,
+    email VARCHAR2(255),
+    password VARCHAR2(100),
+    phone_number VARCHAR2(15)
+);
+
+CREATE TABLE Ticket (
+    ticket_id INT PRIMARY KEY,
+    srst_id INT,
+    purchase_date DATE,
+    fare DECIMAL(10, 2),
+    FOREIGN KEY (srst_id) REFERENCES MASTER_TABLE(srst_id)
+);
+
+CREATE TABLE METRO_ADMIN.TICKETING_SYSTEM (
+    TICKET_SYSTEM_ID NUMBER PRIMARY KEY,
+    COMMUTER_ID NUMBER,
+    START_STATION VARCHAR2(100),
+    END_STATION VARCHAR2(100),
+    "TIME" DATE,
+    CONSTRAINT FK_COMMUTER_ID FOREIGN KEY (COMMUTER_ID) REFERENCES METRO_ADMIN.COMMUTER(COMMUTER_ID)
+);
+
+CREATE TABLE Feedback (
+    feedback_id INT PRIMARY KEY,
+    ticket_id INT,
+    feedback_text VARCHAR2(255),
+    rating INT,
+    date_of_feedback DATE,
+    FOREIGN KEY (ticket_id) REFERENCES Ticket(ticket_id)
+);
+*/
