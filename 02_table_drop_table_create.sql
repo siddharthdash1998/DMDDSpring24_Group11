@@ -157,6 +157,7 @@ BEGIN
                 first_name VARCHAR2(255) NOT NULL,
                 last_name VARCHAR2(255) NOT NULL,
                 email VARCHAR2(255),
+                password VARCHAR2(100),
                 phone_number VARCHAR2(15)
             )';
             DBMS_OUTPUT.PUT_LINE('Created Table COMMUTER');
