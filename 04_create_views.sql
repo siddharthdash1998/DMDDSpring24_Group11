@@ -163,8 +163,6 @@ EXCEPTION
 END;
 /
 
-
-
 ----------------------------
 
 -- Create view for Orange Line Inbound
@@ -223,11 +221,7 @@ JOIN (
 ) o ON s.station_id = o.station_id
 ORDER BY o.order_id;
 
-
-
-
-----------------Feedback received ordered by Station -----------------------
-
+-- Create view for Feedback received ordered by Station
 CREATE OR REPLACE VIEW Feedback_With_Station AS
 SELECT f.feedback_id,
        f.feedback_text,
@@ -239,4 +233,35 @@ JOIN Ticket t ON f.ticket_id = t.ticket_id
 JOIN MASTER_TABLE mt ON t.srst_id = mt.srst_id
 JOIN Station s ON mt.station_id = s.station_id;
 
+-- Create view for Top 3 Busiest Stations
+CREATE OR REPLACE VIEW Top3_Busiest_Stations AS
+SELECT s.station_id, s.station_name, COUNT(*) AS total_tickets_sold
+FROM Ticket t
+JOIN MASTER_TABLE mt ON t.srst_id = mt.srst_id
+JOIN Station s ON mt.station_id = s.station_id
+GROUP BY s.station_id, s.station_name
+ORDER BY total_tickets_sold DESC
+FETCH FIRST 3 ROWS ONLY;
 
+-- Create view for Most Common Commuter
+CREATE OR REPLACE VIEW Most_Common_Commuter AS
+SELECT c.commuter_id, c.first_name, c.last_name, c.email, c.phone_number, COUNT(*) AS total_tickets_purchased
+FROM TICKETING_SYSTEM ts
+JOIN COMMUTER c ON ts.COMMUTER_ID = c.COMMUTER_ID
+GROUP BY c.commuter_id, c.first_name, c.last_name, c.email, c.phone_number
+ORDER BY total_tickets_purchased DESC
+FETCH FIRST 1 ROW ONLY;
+
+-- Create view for Total Revenue By Route
+CREATE OR REPLACE VIEW Total_Revenue_By_Route AS
+SELECT mt.route_id, r.route_name, SUM(t.fare) AS total_revenue
+FROM Ticket t
+JOIN MASTER_TABLE mt ON t.srst_id = mt.srst_id
+JOIN Route r ON mt.route_id = r.route_id
+GROUP BY mt.route_id, r.route_name;
+
+-- Create view for Schedule Changes Per Employee
+CREATE OR REPLACE VIEW Schedule_Changes_Per_Employee AS
+SELECT employee_id, COUNT(*) AS num_schedule_changes
+FROM schedule_change_request
+GROUP BY employee_id;
