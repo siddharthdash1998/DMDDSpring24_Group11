@@ -1,0 +1,179 @@
+SELECT * FROM METRO_ADMIN.ACCEPTED_SCHEDULE_CHANGE_REQUESTS;
+SELECT * FROM METRO_ADMIN.PENDING_SCHEDULE_CHANGE_REQUESTS;
+SELECT * FROM METRO_ADMIN.REJECTED_SCHEDULE_CHANGE_REQUESTS;
+SELECT * FROM METRO_ADMIN.MALDEN_CENTER_SCHEDULE;
+SELECT * FROM METRO_ADMIN.OAK_GROVE_SCHEDULE;
+-- SELECT * FROM METRO_ADMIN.ORANGE_LINE_OUTBOUND_STATIONS;
+SELECT * FROM METRO_ADMIN.ORANGELINE_INBOUND;
+SELECT * FROM METRO_ADMIN.ORANGELINE_OUTBOUND;
+SELECT * FROM METRO_ADMIN.FEEDBACK_WITH_STATION;
+
+SELECT * FROM METRO_ADMIN.MALDEN_CENTER_SCHEDULE;
+SELECT * FROM METRO_ADMIN.OAK_GROVE_SCHEDULE;
+-- SELECT * FROM METRO_ADMIN.ORANGE_LINE_OUTBOUND_STATIONS;
+SELECT * FROM METRO_ADMIN.ORANGELINE_INBOUND;
+SELECT * FROM METRO_ADMIN.ORANGELINE_OUTBOUND;
+
+
+-- Make sure to be logged in as EMPLOYEEUSER -- 
+
+
+
+-- All the available trains from now till the end of the day at a given station --
+
+CREATE OR REPLACE VIEW Train_Schedule_BackBay_View AS
+SELECT t.train_id,t.train_name, r.route_name, s.station_name, mt."Time"
+FROM Master_table mt
+JOIN Train t ON mt.train_id = t.train_id
+JOIN Route r ON mt.route_id = r.route_id
+JOIN Station s ON mt.station_id = s.station_id
+WHERE s.station_name = 'Back Bay' -- Replace 'Back Bay' with the desired station
+AND mt."Date" = TO_DATE('2024-04-20', 'YYYY-MM-DD') -- Adjust the date as needed
+AND mt."Time" >= SYSTIMESTAMP;
+
+
+--next scheduled train
+
+CREATE OR REPLACE VIEW next_departure_view AS
+SELECT 
+    route_id,
+    CASE 
+        WHEN route_id = 1 THEN 'Inbound'
+        WHEN route_id = 2 THEN 'Outbound'
+        ELSE 'Unknown'
+    END AS direction,
+    TO_CHAR(MIN("Time"), 'HH24:MI') AS next_departure_time
+FROM 
+    Master_table
+WHERE 
+    station_id = 1 -- Replace :station_id with the desired station id
+    AND TRUNC("Time") = TO_DATE('2024-04-20', 'YYYY-MM-DD') -- Filter for trains scheduled for April 20th, 2024
+    AND "Time" > SYSDATE -- Filter for trains departing after the current time
+    AND route_id IN (1, 2) -- Filter for route 1 and route 2
+GROUP BY 
+    route_id;
+
+--First run and last run of the trains for that day for route-1
+
+CREATE OR REPLACE VIEW first_last_run_by_route_view_route_1 AS
+SELECT 
+    r.route_id,
+    r.route_name,
+    s.station_id,
+    s.station_name,
+    TO_CHAR(MIN(mt."Time"), 'HH24:MI:SS') AS first_run,
+    TO_CHAR(MAX(mt."Time"), 'HH24:MI:SS') AS last_run
+FROM 
+    station s
+JOIN 
+    master_table mt ON s.station_id = mt.station_id
+JOIN 
+    route r ON mt.route_id = r.route_id
+WHERE 
+    r.route_id IN (1)
+    AND mt."Date" = TO_DATE('2024-04-20', 'YYYY-MM-DD') -- Replace '2024-04-20' with the desired date
+GROUP BY 
+    r.route_id, r.route_name, s.station_id, s.station_name
+    ORDER BY 
+    s.station_id;
+
+
+--First run and last run of the trains for that day for route-1
+
+CREATE OR REPLACE VIEW first_last_run_by_route_view_route_2 AS
+SELECT 
+    r.route_id,
+    r.route_name,
+    s.station_id,
+    s.station_name,
+    TO_CHAR(MIN(mt."Time"), 'HH24:MI:SS') AS first_run,
+    TO_CHAR(MAX(mt."Time"), 'HH24:MI:SS') AS last_run
+FROM 
+    station s
+JOIN 
+    master_table mt ON s.station_id = mt.station_id
+JOIN 
+    route r ON mt.route_id = r.route_id
+WHERE 
+    r.route_id IN (2)
+    AND mt."Date" = TO_DATE('2024-04-20', 'YYYY-MM-DD') -- Replace '2024-04-20' with the desired date
+GROUP BY 
+    r.route_id, r.route_name, s.station_id, s.station_name
+    ORDER BY 
+    s.station_id;
+
+
+
+-- View to display all data from the TICKETING_SYSTEM table in the METRO_ADMIN schema
+CREATE OR REPLACE VIEW ticketing_system_view AS
+SELECT * FROM METRO_ADMIN.TICKETING_SYSTEM;
+
+-- View to display all data from the Ticket table
+CREATE OR REPLACE VIEW ticket_view AS
+SELECT * FROM Ticket;
+
+-- View to combine ticket information with feedback information, marking tickets as complete
+CREATE OR REPLACE VIEW ticket_complete_feedback_view AS
+SELECT t.ticket_id,
+       t.ticketing_system_id,
+       t.srst_id,
+       t.purchase_date,
+       t.fare,
+       t.journey_end,
+       'Complete' AS status,
+       f.feedback_id,
+       f.feedback_text,
+       f.rating,
+       f.date_of_feedback
+FROM Ticket t
+LEFT JOIN Feedback f ON t.ticket_id = f.ticket_id;
+
+-- View to calculate total income by station
+CREATE OR REPLACE VIEW income_by_station_view AS
+SELECT s.station_id,
+       s.station_name,
+       SUM(t.fare) AS total_income
+FROM Ticket t
+JOIN MASTER_TABLE mt ON t.srst_id = mt.srst_id
+JOIN Station s ON mt.station_id = s.station_id
+GROUP BY s.station_id, s.station_name;
+
+-- View to count total feedback by station
+CREATE OR REPLACE VIEW feedback_by_station_view AS
+SELECT s.station_id,
+       s.station_name,
+       COUNT(f.feedback_id) AS total_feedback
+FROM Feedback f
+JOIN Ticket t ON f.ticket_id = t.ticket_id
+JOIN MASTER_TABLE mt ON t.srst_id = mt.srst_id
+JOIN Station s ON mt.station_id = s.station_id
+GROUP BY s.station_id, s.station_name;
+
+-- View to count total tickets sold by station
+CREATE OR REPLACE VIEW busy_station_by_station_view AS
+SELECT s.station_id,
+       s.station_name,
+       COUNT(t.ticket_id) AS total_tickets_sold
+FROM Ticket t
+JOIN MASTER_TABLE mt ON t.srst_id = mt.srst_id
+JOIN Station s ON mt.station_id = s.station_id
+GROUP BY s.station_id, s.station_name;
+
+
+--Schedule request pending view
+CREATE OR REPLACE VIEW pending_requests_view AS
+SELECT *
+FROM schedule_change_request
+WHERE status = 'pending';
+
+--Schedule request reject view
+CREATE OR REPLACE VIEW rejected_requests_view AS
+SELECT *
+FROM schedule_change_request
+WHERE status = 'rejected';
+
+--Schedule request approved view
+CREATE OR REPLACE VIEW approved_requests_view AS
+SELECT *
+FROM schedule_change_request
+WHERE status = 'accepted';
