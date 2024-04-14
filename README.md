@@ -8,6 +8,9 @@ DEMO Sequence: Please start from file with prefix 01 till 06. For files with pre
 
 Entity Relationship Diagram (ERD):
 
+![ERD](ERD.jpeg)
+
+
 The ERD will depict the entities involved in the metro system and their relationships. It will include entities such as stations, trains, schedules, tickets, commuters, employees, and feedback. Relationships will be established to define how these entities interact with each other.
 
 First, we explore the entities:
