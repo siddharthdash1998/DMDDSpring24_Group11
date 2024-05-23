@@ -4,6 +4,27 @@ Project Repository for Database Management and Database Design Spring 2024 for G
 Metro Line Management System
 Project Topic: Implementing a database system for a metro system in a city of 1 million people, akin to the T in Boston, Massachusetts.
 
+Developed a comprehensive database system for Boston's T (Public Transportation System) to address issues related to time delays, schedule mismanagement, and lack of commuter feedback. This project showcases skills in database design, SQL/PL-SQL programming, procedure and trigger development, and addressing real-world challenges in the transportation domain. 
+
+• Designed an efficient database schema to handle various aspects of the metro system, including train schedules, schedule change requests, real-time updates, commuter feedback, and fare calculation.
+
+• Implemented database views and reports to provide insights into train availability, next arrivals, busiest stations, frequent commuters, schedule changes, ticket sales, and feedback ratings.
+
+• Created database packages for table creation, commuter onboarding, ticketing system, and feedback management.
+
+• Developed stored procedures for table creation, commuter registration/update/deletion, ticket entry, feedback submission, schedule change request handling, and journey status updates.
+
+• Implemented triggers for ticket creation and journey end updates, ensuring data integrity and automation.
+
+• Developed a fare calculation function to provide a fair and distance-based pricing system, addressing the issue of fare evasion and potential revenue loss.
+
+• Utilized SQL, PL/SQL, and database design principles to create a robust and scalable solution for managing Boston's T metro system efficiently.
+
+• Addressed key challenges such as real-time schedule updates, commuter feedback integration, and fare calculation optimization.
+
+• Contributed to improving the reliability, transparency, and commuter experience of Boston's public transportation system.
+
+
 DEMO Sequence: Please start from file with prefix 01 till 06. For files with prefix 07 and 08, kindly create a connection to the database with the mentioned users and their credentials in file 05 to test the views that have been granted to the users.
 
 Entity Relationship Diagram (ERD):
